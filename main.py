@@ -1,5 +1,7 @@
 from tkinter import *
 
+import data
+
 root = Tk()
 root.title = "Currency Converter"
 root.geometry("400x400")
@@ -50,7 +52,7 @@ label_from.grid(sticky=W, padx=25, pady=5)
 menu_from.grid(sticky=W, padx=22, ipady=3, ipadx=7)
 
 label_amount = Label(root, text="Amount")
-entry_amount = Entry(root)
+entry_amount = Entry(root, font=("bold", 12,))
 label_amount.grid(sticky=W, padx=25, pady=5)
 entry_amount.grid(sticky=W, padx=25, ipady=7)
 
@@ -60,7 +62,18 @@ currency_to.set(currencyList[31])
 label_to.grid(sticky=W, padx=25, pady=5)
 menu_to.grid(sticky=W, padx=22, ipady=3, ipadx=7)
 
-button_convert = Button(root, text="Convert", font=("bold", 12))
+
+def convert_clicked():
+    base = currency_from.get()[0:3]
+    sec = currency_to.get()[0:3]
+    amount = float(entry_amount.get())
+    if amount < 0:
+        print("Invalid Amount Entered")
+    else:
+        print(data.print_amount(amount, base, sec))
+
+
+button_convert = Button(root, text="Convert", font=("bold", 12,), command=convert_clicked)
 button_convert.grid(sticky=W, padx=25, pady=20, ipady=3, ipadx=7)
 
 root.mainloop()
