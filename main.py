@@ -66,7 +66,12 @@ menu_to.grid(sticky=W, padx=22, ipady=3, ipadx=7)
 def convert_clicked():
     base = currency_from.get()[0:3]
     sec = currency_to.get()[0:3]
-    amount = float(entry_amount.get())
+    try:
+        amount = float(entry_amount.get())
+    except ValueError:
+        print("Please Enter Numbers Only")
+        return
+
     if amount < 0:
         print("Invalid Amount Entered")
     else:
