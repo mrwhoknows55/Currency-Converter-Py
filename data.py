@@ -28,4 +28,4 @@ def print_amount(amount, base_currency, to_currency):
         if final_amount < 0:
             return "Something Went Wrong, Please Try After Some Time!"
         else:
-            return str(final_amount)
+            return str(round(final_amount, 2))

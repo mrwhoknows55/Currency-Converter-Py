@@ -1,11 +1,12 @@
 from tkinter import *
-
+from tkinter import ttk, messagebox, font
+from ttkthemes import ThemedTk
 import data
 
-root = Tk()
-root.title = "Currency Converter"
-root.geometry("400x400")
-Label(root, text="").grid(pady=10)
+root = ThemedTk(theme="breeze")
+root.title("Currency Converter")
+root.geometry("500x500")
+ttk.Label(root, text="").grid(pady=10)
 
 currency_from = StringVar()
 currency_to = StringVar()
@@ -45,22 +46,22 @@ currencyList = [
     "ZAR: South African Rand"
 ]
 
-label_from = Label(root, text="From")
-menu_from = OptionMenu(root, currency_from, *currencyList)
+label_from = ttk.Label(root, text="From:", padding=10, font="Helvetica 14 normal")
+menu_from = ttk.OptionMenu(root, currency_from, *currencyList)
 currency_from.set(currencyList[15])
-label_from.grid(sticky=W, padx=25, pady=5)
-menu_from.grid(sticky=W, padx=22, ipady=3, ipadx=7)
+label_from.grid(sticky=E, padx=40, pady=5)
+menu_from.grid(row=1, column=1, stick=W, ipady=3, ipadx=7)
 
-label_amount = Label(root, text="Amount")
-entry_amount = Entry(root, font=("bold", 12,))
-label_amount.grid(sticky=W, padx=25, pady=5)
-entry_amount.grid(sticky=W, padx=25, ipady=7)
+label_amount_1 = ttk.Label(root, text="Amount", padding=10, font="Helvetica 14 normal")
+entry_amount = ttk.Entry(root, font="Helvetica 14 normal")
+label_amount_1.grid(sticky=E, padx=40, pady=5)
+entry_amount.grid(row=2, column=1, stick=W, ipady=3, ipadx=7)
 
-label_to = Label(root, text="To")
-menu_to = OptionMenu(root, currency_to, *currencyList)
+label_to = ttk.Label(root, text="To:", padding=10, font=("bold", 12,))
+menu_to = ttk.OptionMenu(root, currency_to, *currencyList)
 currency_to.set(currencyList[31])
-label_to.grid(sticky=W, padx=25, pady=5)
-menu_to.grid(sticky=W, padx=22, ipady=3, ipadx=7)
+label_to.grid(sticky=E, padx=40, pady=5)
+menu_to.grid(row=3, column=1, sticky=W, ipady=3, ipadx=7)
 
 
 def convert_clicked():
@@ -69,16 +70,28 @@ def convert_clicked():
     try:
         amount = float(entry_amount.get())
     except ValueError:
-        print("Please Enter Numbers Only")
+        print("Invalid Amount Entered")
+        messagebox.showerror("Enter Valid Amount", "Please Enter Valid Amount")
         return
 
     if amount < 0:
         print("Invalid Amount Entered")
+        messagebox.showerror("Enter Valid Amount", "Amount Should Be Greater Than Zero")
+
     else:
-        print(data.print_amount(amount, base, sec))
+        converted_amount = data.print_amount(amount, base, sec)
+        print(converted_amount)
+        final_amount.set(converted_amount)
 
 
-button_convert = Button(root, text="Convert", font=("bold", 12,), command=convert_clicked)
-button_convert.grid(sticky=W, padx=25, pady=20, ipady=3, ipadx=7)
+label_amount_2 = ttk.Label(root, text="Amount", padding=10, font="Helvetica 14 normal")
+label_amount_2.grid(row=4, column=0, sticky=E, padx=40, pady=5)
+
+final_amount = StringVar()
+label_final_amount = ttk.Entry(root, textvariable=final_amount, font=("bold", 12,))
+label_final_amount.grid(row=4, column=1, sticky=W, pady=15, ipady=7)
+
+button_convert = ttk.Button(root, text="Convert", command=convert_clicked)
+button_convert.grid(column=1, sticky=W, pady=20, ipady=3, ipadx=7)
 
 root.mainloop()
