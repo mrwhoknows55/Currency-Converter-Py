@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk, messagebox, font
 from ttkthemes import ThemedTk
+from urllib3.exceptions import MaxRetryError, NewConnectionError
+
 import data
 
 root = ThemedTk(theme="breeze")
