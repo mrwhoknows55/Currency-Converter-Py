@@ -1,4 +1,5 @@
 import tkinter as tk
+from datetime import date, timedelta
 from tkinter import ttk, messagebox
 from ttkthemes import ThemedTk
 import data
@@ -6,6 +7,8 @@ import data
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import pandas
+
+import json_to_csv
 
 SMALL_FONT = ("Fira Sans", 12)
 MID_FONT = ("Fira Sans", 19)
@@ -151,6 +154,45 @@ class HomePage(tk.Frame):
 
 class History(tk.Frame):
 
+    # TODO: graph shouldn't be stacked
+    def show_graph(self):
+        # analyze data and plt
+        sampleData = pandas.read_csv('historical_data.csv')
+        fig = Figure(figsize=(15, 6), dpi=100)
+        fig.autofmt_xdate(rotation=45)
+
+        plt = fig.add_subplot(111)
+        plt.clear()
+
+        # TODO: add it to fun params
+        base_sym = self.currency_base.get()[0:3]  # TODO: change to vars
+        to_sym = self.currency_to.get()[0:3]
+        title = "1 " + base_sym + " to " + to_sym
+        plt.set_title(title)
+        plt.plot_date(sampleData.date, sampleData.get(to_sym), '-', label=to_sym)
+        plt.grid(True)
+
+        plt.legend(bbox_to_anchor=(0, 1.02, 1, 0), loc=3, ncol=2, borderaxespad=0.5)
+
+        canvas = FigureCanvasTkAgg(fig, self)
+        canvas.draw()
+        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True, padx=15, pady=15)
+        # toolbar = NavigationToolbar2Tk(canvas, self)
+
+    def get_history_data(self):
+        span = str(self.history_span.get())
+        current_date = date.today().isoformat()
+
+        if span == 'Week':
+            days_before = (date.today() - timedelta(days=7)).isoformat()
+        elif span == 'Half Month':
+            days_before = (date.today() - timedelta(days=15)).isoformat()
+        else:
+            days_before = (date.today() - timedelta(days=30)).isoformat()
+
+        json_to_csv.main(self.currency_base.get()[0:3], self.currency_to.get()[0:3], days_before, current_date)
+        self.show_graph()
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         label = ttk.Label(self, text="History", font=MID_FONT)
@@ -195,6 +237,8 @@ class History(tk.Frame):
         self.currency_to = tk.StringVar()
         self.final_amount = tk.StringVar()
         self.entry_amount = tk.StringVar()
+        self.history_span = tk.StringVar()
+        self.date_span_list = ['Week', 'Week', 'Half Month', 'Month']
 
         menu_base_currencies = ttk.OptionMenu(self, self.currency_base, *self.currencyList)
         self.currency_base.set(self.currencyList[15])
@@ -207,29 +251,12 @@ class History(tk.Frame):
         self.currency_to.set(self.currencyList[31])
         menu_to_currencies.pack(pady=10, ipady=3, ipadx=7)
 
-        # analyze data and plt
-        sampleData = pandas.read_csv('historical_data.csv')
-        fig = Figure(figsize=(15, 6), dpi=100)
-        fig.autofmt_xdate(rotation=45)
+        menu_history_span = ttk.OptionMenu(self, self.history_span, *self.date_span_list)
+        self.history_span.set(self.date_span_list[1])
+        menu_history_span.pack(pady=10, ipady=3, ipadx=7)
 
-        plt = fig.add_subplot(111)
-        plt.clear()
-
-        # TODO: add it to fun params
-        base_sym = "USD"
-        to_sym = "INR"
-        title = "1 " + base_sym + " to " + to_sym
-        plt.set_title(title)
-        plt.plot_date(sampleData.date, sampleData.get(to_sym), '-', label=to_sym)
-        plt.grid(True)
-
-        plt.legend(bbox_to_anchor=(0, 1.02, 1, 0), loc=3, ncol=2, borderaxespad=0.5)
-
-        canvas = FigureCanvasTkAgg(fig, self)
-        canvas.draw()
-        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True, padx=15, pady=15)
-
-        toolbar = NavigationToolbar2Tk(canvas, self)
+        button_get_history = ttk.Button(self, text="Get History", command=self.get_history_data)
+        button_get_history.pack(pady=10, ipady=3, ipadx=7)
 
         button_goto_home = ttk.Button(self, text="Home", command=lambda: controller.show_frame(HomePage))
         button_goto_home.pack(pady=20, ipady=3, ipadx=7)
