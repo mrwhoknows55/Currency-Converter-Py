@@ -5,7 +5,7 @@ from ttkthemes import ThemedTk
 import data
 
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pandas
 
 import json_to_csv
@@ -22,7 +22,7 @@ class CurrencyApp(ThemedTk):
         # __init__ function for class Tk
         ThemedTk.__init__(self, *args, **kwargs)
         self.set_theme("breeze")
-        self.minsize(600, 600)
+        self.minsize(1500, 900)
 
         # creating a container
         container = tk.Frame(self)
@@ -159,24 +159,29 @@ class History(tk.Frame):
         # analyze data and plt
         sampleData = pandas.read_csv('historical_data.csv')
         fig = Figure(figsize=(15, 6), dpi=100)
-        fig.autofmt_xdate(rotation=45)
-
         plt = fig.add_subplot(111)
-        plt.clear()
+
+        list_name = self.pack_slaves()
+        c = 1
+        for item in list_name:
+            if c == 8:
+                plt.clear()
+                item.destroy()
+            c += 1
 
         # TODO: add it to fun params
         base_sym = self.currency_base.get()[0:3]  # TODO: change to vars
         to_sym = self.currency_to.get()[0:3]
-        title = "1 " + base_sym + " to " + to_sym
+        title = "1 " + base_sym + " VS " + to_sym
         plt.set_title(title)
-        plt.plot_date(sampleData.date, sampleData.get(to_sym), '-', label=to_sym)
+        plt.plot(sampleData.date, sampleData.get(to_sym), '-', label=to_sym)
         plt.grid(True)
 
         plt.legend(bbox_to_anchor=(0, 1.02, 1, 0), loc=3, ncol=2, borderaxespad=0.5)
 
         canvas = FigureCanvasTkAgg(fig, self)
         canvas.draw()
-        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True, padx=15, pady=15)
+        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
         # toolbar = NavigationToolbar2Tk(canvas, self)
 
     def get_history_data(self):
@@ -190,6 +195,7 @@ class History(tk.Frame):
         else:
             days_before = (date.today() - timedelta(days=30)).isoformat()
 
+        # TODO: use variable from fun param
         json_to_csv.main(self.currency_base.get()[0:3], self.currency_to.get()[0:3], days_before, current_date)
         self.show_graph()
 
@@ -238,28 +244,28 @@ class History(tk.Frame):
         self.final_amount = tk.StringVar()
         self.entry_amount = tk.StringVar()
         self.history_span = tk.StringVar()
-        self.date_span_list = ['Week', 'Week', 'Half Month', 'Month']
+        self.date_span_list = ['', 'Week', 'Half Month', 'Month']
 
         menu_base_currencies = ttk.OptionMenu(self, self.currency_base, *self.currencyList)
-        self.currency_base.set(self.currencyList[15])
-        menu_base_currencies.pack(ipady=3, ipadx=7, pady=10)
+        self.currency_base.set(self.currencyList[31])
+        menu_base_currencies.pack(ipady=3, ipadx=7, pady=5)
 
         label_vs = ttk.Label(self, text="VS")
-        label_vs.pack()
+        label_vs.pack(after=menu_base_currencies)
 
         menu_to_currencies = ttk.OptionMenu(self, self.currency_to, *self.currencyList)
-        self.currency_to.set(self.currencyList[31])
-        menu_to_currencies.pack(pady=10, ipady=3, ipadx=7)
+        self.currency_to.set(self.currencyList[15])
+        menu_to_currencies.pack(pady=5, ipady=3, ipadx=7)
 
         menu_history_span = ttk.OptionMenu(self, self.history_span, *self.date_span_list)
         self.history_span.set(self.date_span_list[1])
-        menu_history_span.pack(pady=10, ipady=3, ipadx=7)
+        menu_history_span.pack(pady=5, ipady=3, ipadx=7)
 
         button_get_history = ttk.Button(self, text="Get History", command=self.get_history_data)
-        button_get_history.pack(pady=10, ipady=3, ipadx=7)
+        button_get_history.pack(pady=5, ipady=3, ipadx=7)
 
         button_goto_home = ttk.Button(self, text="Home", command=lambda: controller.show_frame(HomePage))
-        button_goto_home.pack(pady=20, ipady=3, ipadx=7)
+        button_goto_home.pack(pady=5, ipady=3, ipadx=7)
 
 
 # Driver Code
